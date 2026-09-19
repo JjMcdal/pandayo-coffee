@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function AdminPage() {
   const supabase = createClient();
@@ -23,7 +24,10 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-stone-50 p-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        <h1 className="text-lg font-medium text-stone-800">Admin overview</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-medium text-stone-800">Admin overview</h1>
+            <LogoutButton />
+              </div>
 
         <div className="grid grid-cols-3 gap-4">
           <div className="rounded-xl border border-stone-200 bg-white p-4">

@@ -72,3 +72,6 @@ editing their row in `profiles`.
   seeded directly in the database)
 - Receipt/printout for completed sales
 - Jest/Playwright tests + GitHub Actions CI
+
+
+<!-- test-marker-12345 -->

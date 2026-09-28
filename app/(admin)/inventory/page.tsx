@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { LogoutButton } from "@/components/LogoutButton";
 import {
   addInventoryItem,
   updateInventoryItem,
@@ -45,15 +46,18 @@ export default async function InventoryPage() {
             </p>
           </div>
 
-          <details className="relative">
-            <summary className="cursor-pointer list-none rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800">
-              Add item
-            </summary>
+          <div className="flex items-center gap-3">
+            <LogoutButton />
 
-            <div className="absolute right-0 z-10 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
-              <h2 className="mb-4 text-base font-medium text-stone-800">
-                Add inventory item
-              </h2>
+            <details className="relative">
+              <summary className="cursor-pointer list-none rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800">
+                Add item
+              </summary>
+
+              <div className="absolute right-0 z-10 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
+                <h2 className="mb-4 text-base font-medium text-stone-800">
+                  Add inventory item
+                </h2>
 
               <form action={addInventoryItem} className="space-y-3">
                 <div>
@@ -159,8 +163,9 @@ export default async function InventoryPage() {
                   Save item
                 </button>
               </form>
-            </div>
-          </details>
+              </div>
+            </details>
+          </div>
         </div>
 
         {/* INVENTORY TABLE */}

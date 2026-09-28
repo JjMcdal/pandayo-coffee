@@ -3,7 +3,7 @@ import { LogoutButton } from "@/components/LogoutButton";
 import { SaleForm } from "./SaleForm";
 
 export default async function PosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: menuItems } = await supabase
     .from("menu_items")

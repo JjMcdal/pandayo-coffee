@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
 import { recordSale, type SaleFormState } from "./actions";
 
 type MenuItem = {
@@ -27,7 +28,7 @@ function SubmitButton() {
 }
 
 export function SaleForm({ menuItems }: { menuItems: MenuItem[] }) {
-  const [state, formAction] = useFormState(recordSale, initialState);
+  const [state, formAction] = useActionState(recordSale, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
   // Clear the quantity inputs after a successful sale.

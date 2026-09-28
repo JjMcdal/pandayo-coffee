@@ -5,7 +5,7 @@ import {
 } from "./actions";
 
 export default async function InventoryPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: items, error } = await supabase
     .from("inventory_items")

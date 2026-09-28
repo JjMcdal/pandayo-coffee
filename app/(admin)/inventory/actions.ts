@@ -31,7 +31,7 @@ function getRequiredNumber(formData: FormData, field: string) {
 }
 
 export async function addInventoryItem(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -67,7 +67,7 @@ export async function addInventoryItem(formData: FormData) {
 }
 
 export async function updateInventoryItem(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 // do you belong". Middleware still protects direct navigation to
 // /admin, /pos, /inventory afterwards.
 export async function login(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

@@ -62,12 +62,12 @@ export default function LandingPage() {
             </a>
           </div>
 
-          <Link
+          <a
             href="/login"
             className="rounded-xl bg-[#111111] px-4 py-3 text-[16px] font-bold text-[#f97316] transition-all duration-200 hover:bg-[#2a2a2a] sm:px-7 sm:py-4 sm:text-[18px]"
           >
             Login
-          </Link>
+          </a>
         </nav>
       </header>
 

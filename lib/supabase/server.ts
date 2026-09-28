@@ -17,8 +17,8 @@ type CookieToSet = {
 };
 
 // Used in Server Components, Server Actions, and Route Handlers
-export function createClient() {
-  const cookieStore = cookies();
+export async function createClient() {
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +35,7 @@ export function createClient() {
             );
           } catch {
             // Called from a Server Component — safe to ignore because
-            // middleware.ts refreshes the session on every request.
+            // proxy.ts refreshes the session on every request.
           }
         },
       },

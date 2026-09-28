@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function AdminPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: sales } = await supabase
     .from("sales")

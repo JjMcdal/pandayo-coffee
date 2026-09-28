@@ -18,7 +18,7 @@ export async function recordSale(
   _prevState: SaleFormState,
   formData: FormData
 ): Promise<SaleFormState> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

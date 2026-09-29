@@ -1,9 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "@/components/LogoutButton";
 import {
   addInventoryItem,
   updateInventoryItem,
 } from "./actions";
+
+const CATEGORIES = [
+  "Coffee Beans",
+  "Dairy",
+  "Syrups & Flavors",
+  "Packaging",
+  "Ingredients",
+  "Equipment",
+];
+
+const UNITS = ["kg", "g", "L", "ml", "pcs"];
 
 export default async function InventoryPage() {
   const supabase = await createClient();
@@ -46,18 +56,15 @@ export default async function InventoryPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <LogoutButton />
+          <details className="relative">
+            <summary className="cursor-pointer list-none rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800">
+              Add item
+            </summary>
 
-            <details className="relative">
-              <summary className="cursor-pointer list-none rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800">
-                Add item
-              </summary>
-
-              <div className="absolute right-0 z-10 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
-                <h2 className="mb-4 text-base font-medium text-stone-800">
-                  Add inventory item
-                </h2>
+            <div className="absolute right-0 z-10 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
+              <h2 className="mb-4 text-base font-medium text-stone-800">
+                Add inventory item
+              </h2>
 
               <form action={addInventoryItem} className="space-y-3">
                 <div>
@@ -86,14 +93,22 @@ export default async function InventoryPage() {
                     Category
                   </label>
 
-                  <input
+                  <select
                     id="add-category"
                     name="category"
-                    type="text"
                     required
-                    placeholder="Ingredients"
+                    defaultValue=""
                     className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                  />
+                  >
+                    <option value="" disabled>
+                      Select category
+                    </option>
+                    {CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -125,14 +140,22 @@ export default async function InventoryPage() {
                       Unit
                     </label>
 
-                    <input
+                    <select
                       id="add-unit"
                       name="unit"
-                      type="text"
                       required
-                      placeholder="kg"
+                      defaultValue=""
                       className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                    />
+                    >
+                      <option value="" disabled>
+                        Select unit
+                      </option>
+                      {UNITS.map((unit) => (
+                        <option key={unit} value={unit}>
+                          {unit}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -163,9 +186,8 @@ export default async function InventoryPage() {
                   Save item
                 </button>
               </form>
-              </div>
-            </details>
-          </div>
+            </div>
+          </details>
         </div>
 
         {/* INVENTORY TABLE */}
@@ -187,7 +209,7 @@ export default async function InventoryPage() {
 
               <tbody>
                 {items?.length ? (
-                  items.map((item) => {
+                  items.map((item: any) => {
                     const quantity = Number(item.quantity ?? 0);
                     const reorderThreshold = Number(
                       item.reorder_threshold ?? 0
@@ -275,14 +297,22 @@ export default async function InventoryPage() {
                                     Category
                                   </label>
 
-                                  <input
+                                  <select
                                     id={`category-${item.id}`}
                                     name="category"
-                                    type="text"
                                     required
                                     defaultValue={item.category}
                                     className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                                  />
+                                  >
+                                    {CATEGORIES.map((category) => (
+                                      <option
+                                        key={category}
+                                        value={category}
+                                      >
+                                        {category}
+                                      </option>
+                                    ))}
+                                  </select>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
@@ -314,14 +344,19 @@ export default async function InventoryPage() {
                                       Unit
                                     </label>
 
-                                    <input
+                                    <select
                                       id={`unit-${item.id}`}
                                       name="unit"
-                                      type="text"
                                       required
                                       defaultValue={item.unit}
                                       className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                                    />
+                                    >
+                                      {UNITS.map((unit) => (
+                                        <option key={unit} value={unit}>
+                                          {unit}
+                                        </option>
+                                      ))}
+                                    </select>
                                   </div>
                                 </div>
 

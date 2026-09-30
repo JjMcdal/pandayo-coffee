@@ -1,5 +1,7 @@
 -- Run this in the Supabase SQL editor (or via the CLI) to set up
 -- Pandayo Coffee's roles, inventory, and POS tables.
+-- NOTE: this is for a FRESH project. The live database already has
+-- these changes applied, so do not re-run this file against it.
 
 -- 1. Role enum
 create type user_role as enum ('owner', 'cashier', 'staff');
@@ -17,6 +19,17 @@ alter table profiles enable row level security;
 create policy "Users can view own profile"
   on profiles for select
   using (auth.uid() = id);
+
+-- 2b. Role lookup helper for RLS policies. security definer lets it read
+-- profiles regardless of the caller's own RLS; it only ever returns the
+-- caller's own role (auth.uid()).
+create function public.current_user_role()
+returns user_role
+language sql stable security definer
+set search_path = public
+as $$
+  select role from public.profiles where id = auth.uid()
+$$;
 
 -- 3. Auto-create a profile row whenever an account is created.
 -- There's no public sign-up page — accounts are created directly in
@@ -49,15 +62,22 @@ create policy "Authenticated users can view menu items"
   using (auth.role() = 'authenticated');
 
 -- 5. Inventory items
+-- Item names are restricted to the Pandayo Coffee catalog in the app
+-- (lib/inventory-catalog.ts); category and unit are derived from it.
 create table inventory_items (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  category text not null, -- e.g. 'Raw materials', 'Packaging'
+  category text not null, -- e.g. 'Coffee Beans', 'Dairy', 'Packaging'
   quantity numeric not null default 0,
-  unit text not null, -- e.g. 'kg', 'L', 'pcs'
+  unit text not null, -- one of: kg, g, L, ml, pcs
   reorder_threshold numeric not null default 0,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint unit_check check (unit in ('kg', 'g', 'L', 'ml', 'pcs'))
 );
+
+-- One row per item name, case-insensitive
+create unique index inventory_items_name_unique
+  on inventory_items (lower(name));
 
 alter table inventory_items enable row level security;
 
@@ -65,9 +85,34 @@ create policy "Authenticated users can view inventory"
   on inventory_items for select
   using (auth.role() = 'authenticated');
 
-create policy "Authenticated users can manage inventory"
-  on inventory_items for all
-  using (auth.role() = 'authenticated');
+-- Only owner and staff may write inventory. Cashiers can read stock
+-- (POS needs it) but cannot change it directly. The POS auto-deduct
+-- trigger below is security definer, so it is not affected by these.
+create policy "Owner and staff can insert inventory"
+  on inventory_items for insert
+  with check (public.current_user_role() in ('owner', 'staff'));
+
+create policy "Owner and staff can update inventory"
+  on inventory_items for update
+  using (public.current_user_role() in ('owner', 'staff'))
+  with check (public.current_user_role() in ('owner', 'staff'));
+
+create policy "Owner can delete inventory"
+  on inventory_items for delete
+  using (public.current_user_role() = 'owner');
+
+-- Keep updated_at correct on every manual edit
+create function public.touch_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger inventory_items_touch_updated_at
+  before update on inventory_items
+  for each row execute procedure public.touch_updated_at();
 
 -- 6. Links a menu item to the inventory it consumes, and how much of
 -- that inventory item one sale uses up. This is what lets a POS sale

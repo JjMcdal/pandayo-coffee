@@ -1,19 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  addInventoryItem,
-  updateInventoryItem,
-} from "./actions";
-
-const CATEGORIES = [
-  "Coffee Beans",
-  "Dairy",
-  "Syrups & Flavors",
-  "Packaging",
-  "Ingredients",
-  "Equipment",
-];
-
-const UNITS = ["kg", "g", "L", "ml", "pcs"];
+import { LogoutButton } from "@/components/LogoutButton";
+import { INVENTORY_CATALOG } from "@/lib/inventory-catalog";
+import { updateInventoryItem } from "./actions";
+import { AddItemForm } from "./AddItemForm";
 
 export default async function InventoryPage() {
   const supabase = await createClient();
@@ -32,14 +21,24 @@ export default async function InventoryPage() {
               Failed to load inventory
             </h1>
 
-            <p className="mt-2 text-sm text-red-600">
-              {error.message}
-            </p>
+            <p className="mt-2 text-sm text-red-600">{error.message}</p>
           </div>
         </div>
       </main>
     );
   }
+
+  // Only offer catalog items that are not in inventory yet.
+  const existing = new Set(
+    (items ?? []).map((i: any) => String(i.name).toLowerCase())
+  );
+  const availableNames = INVENTORY_CATALOG.filter(
+    (i) => !existing.has(i.name.toLowerCase())
+  ).map((i) => i.name);
+
+  const inputClass =
+    "w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600";
+  const labelClass = "mb-1 block text-xs font-medium text-stone-600";
 
   return (
     <main className="min-h-screen bg-stone-50 p-8">
@@ -56,138 +55,23 @@ export default async function InventoryPage() {
             </p>
           </div>
 
-          <details className="relative">
-            <summary className="cursor-pointer list-none rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800">
-              Add item
-            </summary>
+          <div className="flex items-center gap-3">
+            <details className="relative">
+              <summary className="cursor-pointer list-none rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800">
+                Add item
+              </summary>
 
-            <div className="absolute right-0 z-10 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
-              <h2 className="mb-4 text-base font-medium text-stone-800">
-                Add inventory item
-              </h2>
+              <div className="absolute right-0 z-10 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
+                <h2 className="mb-4 text-base font-medium text-stone-800">
+                  Add inventory item
+                </h2>
 
-              <form action={addInventoryItem} className="space-y-3">
-                <div>
-                  <label
-                    htmlFor="add-name"
-                    className="mb-1 block text-xs font-medium text-stone-600"
-                  >
-                    Item name
-                  </label>
+                <AddItemForm availableNames={availableNames} />
+              </div>
+            </details>
 
-                  <input
-                    id="add-name"
-                    name="name"
-                    type="text"
-                    required
-                    placeholder="Coffee beans"
-                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="add-category"
-                    className="mb-1 block text-xs font-medium text-stone-600"
-                  >
-                    Category
-                  </label>
-
-                  <select
-                    id="add-category"
-                    name="category"
-                    required
-                    defaultValue=""
-                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                  >
-                    <option value="" disabled>
-                      Select category
-                    </option>
-                    {CATEGORIES.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      htmlFor="add-quantity"
-                      className="mb-1 block text-xs font-medium text-stone-600"
-                    >
-                      Quantity
-                    </label>
-
-                    <input
-                      id="add-quantity"
-                      name="quantity"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      required
-                      placeholder="10"
-                      className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="add-unit"
-                      className="mb-1 block text-xs font-medium text-stone-600"
-                    >
-                      Unit
-                    </label>
-
-                    <select
-                      id="add-unit"
-                      name="unit"
-                      required
-                      defaultValue=""
-                      className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                    >
-                      <option value="" disabled>
-                        Select unit
-                      </option>
-                      {UNITS.map((unit) => (
-                        <option key={unit} value={unit}>
-                          {unit}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="add-threshold"
-                    className="mb-1 block text-xs font-medium text-stone-600"
-                  >
-                    Reorder threshold
-                  </label>
-
-                  <input
-                    id="add-threshold"
-                    name="reorder_threshold"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                    placeholder="5"
-                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800"
-                >
-                  Save item
-                </button>
-              </form>
-            </div>
-          </details>
+            <LogoutButton />
+          </div>
         </div>
 
         {/* INVENTORY TABLE */}
@@ -201,9 +85,7 @@ export default async function InventoryPage() {
                   <th className="px-4 py-3 font-normal">Stock</th>
                   <th className="px-4 py-3 font-normal">Unit</th>
                   <th className="px-4 py-3 font-normal">Status</th>
-                  <th className="px-4 py-3 text-right font-normal">
-                    Action
-                  </th>
+                  <th className="px-4 py-3 text-right font-normal">Action</th>
                 </tr>
               </thead>
 
@@ -230,13 +112,9 @@ export default async function InventoryPage() {
                           {item.category}
                         </td>
 
-                        <td className="px-4 py-4 text-stone-600">
-                          {quantity}
-                        </td>
+                        <td className="px-4 py-4 text-stone-600">{quantity}</td>
 
-                        <td className="px-4 py-4 text-stone-600">
-                          {item.unit}
-                        </td>
+                        <td className="px-4 py-4 text-stone-600">{item.unit}</td>
 
                         <td className="px-4 py-4">
                           <span
@@ -258,7 +136,10 @@ export default async function InventoryPage() {
 
                             <div className="absolute right-0 z-10 mt-2 w-80 rounded-xl border border-stone-200 bg-white p-5 text-left shadow-lg">
                               <h2 className="mb-4 text-base font-medium text-stone-800">
-                                Edit item
+                                {item.name}{" "}
+                                <span className="text-stone-400">
+                                  ({item.unit})
+                                </span>
                               </h2>
 
                               <form
@@ -271,55 +152,11 @@ export default async function InventoryPage() {
                                   value={item.id}
                                 />
 
-                                <div>
-                                  <label
-                                    htmlFor={`name-${item.id}`}
-                                    className="mb-1 block text-xs font-medium text-stone-600"
-                                  >
-                                    Item name
-                                  </label>
-
-                                  <input
-                                    id={`name-${item.id}`}
-                                    name="name"
-                                    type="text"
-                                    required
-                                    defaultValue={item.name}
-                                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                                  />
-                                </div>
-
-                                <div>
-                                  <label
-                                    htmlFor={`category-${item.id}`}
-                                    className="mb-1 block text-xs font-medium text-stone-600"
-                                  >
-                                    Category
-                                  </label>
-
-                                  <select
-                                    id={`category-${item.id}`}
-                                    name="category"
-                                    required
-                                    defaultValue={item.category}
-                                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                                  >
-                                    {CATEGORIES.map((category) => (
-                                      <option
-                                        key={category}
-                                        value={category}
-                                      >
-                                        {category}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-
                                 <div className="grid grid-cols-2 gap-3">
                                   <div>
                                     <label
                                       htmlFor={`quantity-${item.id}`}
-                                      className="mb-1 block text-xs font-medium text-stone-600"
+                                      className={labelClass}
                                     >
                                       Quantity
                                     </label>
@@ -332,52 +169,29 @@ export default async function InventoryPage() {
                                       step="0.01"
                                       required
                                       defaultValue={quantity}
-                                      className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
+                                      className={inputClass}
                                     />
                                   </div>
 
                                   <div>
                                     <label
-                                      htmlFor={`unit-${item.id}`}
-                                      className="mb-1 block text-xs font-medium text-stone-600"
+                                      htmlFor={`threshold-${item.id}`}
+                                      className={labelClass}
                                     >
-                                      Unit
+                                      Reorder threshold
                                     </label>
 
-                                    <select
-                                      id={`unit-${item.id}`}
-                                      name="unit"
+                                    <input
+                                      id={`threshold-${item.id}`}
+                                      name="reorder_threshold"
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
                                       required
-                                      defaultValue={item.unit}
-                                      className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                                    >
-                                      {UNITS.map((unit) => (
-                                        <option key={unit} value={unit}>
-                                          {unit}
-                                        </option>
-                                      ))}
-                                    </select>
+                                      defaultValue={reorderThreshold}
+                                      className={inputClass}
+                                    />
                                   </div>
-                                </div>
-
-                                <div>
-                                  <label
-                                    htmlFor={`threshold-${item.id}`}
-                                    className="mb-1 block text-xs font-medium text-stone-600"
-                                  >
-                                    Reorder threshold
-                                  </label>
-
-                                  <input
-                                    id={`threshold-${item.id}`}
-                                    name="reorder_threshold"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    required
-                                    defaultValue={reorderThreshold}
-                                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600"
-                                  />
                                 </div>
 
                                 <button

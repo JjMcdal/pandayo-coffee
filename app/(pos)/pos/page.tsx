@@ -1,26 +1,43 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "@/components/LogoutButton";
-import { SaleForm } from "./SaleForm";
+import { AppHeader } from "@/components/AppHeader";
+import { Sidebar, type Role } from "@/components/Sidebar";
+import { PosClient } from "./PosClient";
 
 export default async function PosPage() {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", user.id)
+    .single();
+
+  const role = (profile?.role ?? "staff") as Role;
+  const name = profile?.full_name || user.email || "User";
+
   const { data: menuItems } = await supabase
     .from("menu_items")
-    .select("*")
+    .select("id, name, price, category, image_url")
     .eq("is_available", true)
     .order("name");
 
   return (
-    <main className="min-h-screen bg-stone-50 p-8">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-lg font-medium text-stone-800">New sale</h1>
-          <LogoutButton />
-        </div>
+    <div className="flex min-h-screen flex-col">
+      <AppHeader section="POS" name={name} role={role} />
 
-        <SaleForm menuItems={menuItems ?? []} />
+      <div className="flex flex-1 flex-col md:flex-row">
+        <Sidebar role={role} />
+        <PosClient menuItems={menuItems ?? []} />
       </div>
-    </main>
+    </div>
   );
 }

@@ -75,3 +75,6 @@ editing their row in `profiles`.
 
 
 <!-- test-marker-12345 -->
+
+   After `schema.sql`, run every file in `supabase/migrations/` in order
+   (001, 002, ...). Existing live databases already have 001 applied.

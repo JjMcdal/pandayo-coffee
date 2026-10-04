@@ -57,6 +57,9 @@ editing their row in `profiles`.
    `user_role` enum, `profiles` (with an auto-create trigger,
    defaulting to `staff`), `menu_items`, `inventory_items`,
    `menu_item_ingredients`, `sales`, and `sale_items`.
+
+   After `schema.sql`, run every file in `supabase/migrations/` in order
+   (001, 002, ...). Existing live databases already have 001 applied.
 3. Copy `.env.local.example` to `.env.local` and fill in your project
    URL and anon key.
 4. In Supabase, create at least one account per role and set their
@@ -72,6 +75,3 @@ editing their row in `profiles`.
   seeded directly in the database)
 - Receipt/printout for completed sales
 - Jest/Playwright tests + GitHub Actions CI
-
-
-<!-- test-marker-12345 -->

@@ -3,7 +3,16 @@
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 
-export function LogoutButton() {
+const VARIANT_STYLES = {
+  light: "border-stone-300 text-stone-600 hover:bg-stone-100",
+  dark: "border-white/20 text-white/80 hover:bg-white/10",
+} as const;
+
+export function LogoutButton({
+  variant = "light",
+}: {
+  variant?: keyof typeof VARIANT_STYLES;
+}) {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -23,7 +32,7 @@ export function LogoutButton() {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg border border-stone-300 px-4 py-2 text-sm text-stone-600 hover:bg-stone-100 disabled:cursor-wait disabled:opacity-60"
+        className={`rounded-lg border px-4 py-2 text-sm disabled:cursor-wait disabled:opacity-60 ${VARIANT_STYLES[variant]}`}
       >
         {loading ? "Logging out..." : "Log out"}
       </button>
